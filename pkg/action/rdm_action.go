@@ -1,6 +1,12 @@
 package action
 
-// 仮置きなので後で修正
-func RandomAction(x int, y int) (int) {
-    return x + y
+import (
+	"../board"
+    "math/rand"
+)
+
+// ランダムな行動を返す
+func RandomAction(bs [36]int) (int) {
+    legal_actions := board.GetLegalActions(bs)
+    return legal_actions[rand.Intn(len(legal_actions))]
 }
