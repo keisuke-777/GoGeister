@@ -36,7 +36,9 @@ func InitBoard(b Board) (Board){
 	b.BoardState[34] = my_pieces[7]
 	
 	// ターンプレイヤの初期化
-	b.Winner = 1
+	b.TurnPlayer = 1
+	b.Winner = 0
+	b.Depth = 0
 
 	// ターン数、勝者は0が初期値のため触らなくて良い
 	return b
@@ -81,6 +83,16 @@ func check_winner(b Board) (int){
 	return 0
 }
 
+func IsDone(b Board) (bool) {
+	if b.Winner != 0{
+		return true
+	}
+	if b.Depth >= 200{
+		return true
+	}
+	return false
+}
+
 // 行動を受けて盤面を更新
 func Next(b Board, action int) (Board){
 	if action == 2 || action == 22 { // ゴール行動だけ特殊処理
@@ -89,6 +101,7 @@ func Next(b Board, action int) (Board){
 	}
 	before_pos, after_pos := action_to_position(action) // 座標取得
 	b.BoardState[before_pos], b.BoardState[after_pos] = 0, b.BoardState[before_pos] // 駒を動かす
+	b.Winner = check_winner(b) // 勝敗の判定（駒を取った場合、勝敗が確定する場合がある）
 	// 相手のターンにする
 	ReverseBoardState(b.BoardState)
 	b.Depth++
@@ -142,7 +155,7 @@ func GetLegalActions(bs [36]int) ([]int) {
 	for position, piece := range bs {
 		if piece == 1 || piece == 2 {
 			x := position % 6
-        	y := int(position / 6)
+        	y := position / 6
 			if y != 5 { // 下端でない
 				if bs[position + 6] != 1 && bs[position + 6] != 2{ // 下に自分の駒がいない
 					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 0))
