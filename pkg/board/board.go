@@ -171,7 +171,7 @@ func GetLegalActions(bs [36]int) ([]int) {
 					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 2))
 				}
 			}
-			if y != 0 { // 右端でない
+			if x != 5 { // 右端でない
 				if bs[position + 1] != 1 && bs[position + 1] != 2{ // 右に自分の駒がいない
 					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 3))
 				}
