@@ -83,12 +83,12 @@ func check_winner(b Board) (int){
 
 // 行動を受けて盤面を更新
 func Next(b Board, action int) (Board){
-	if action == 2 | action == 22: // ゴール行動だけ特殊処理
+	if action == 2 || action == 22 { // ゴール行動だけ特殊処理
 		b.Winner = b.TurnPlayer
 		return b
+	}
 	before_pos, after_pos := action_to_position(action) // 座標取得
 	b.BoardState[before_pos], b.BoardState[after_pos] = 0, b.BoardState[before_pos] // 駒を動かす
-	
 	// 相手のターンにする
 	ReverseBoardState(b.BoardState)
 	b.Depth++
@@ -120,6 +120,52 @@ func ReverseBoardState(bs [36]int){
 		// 端から符号反転させてひっくり返す
 		bs[i], bs[n-i-1] = -bs[n-i-1], -bs[i]
 	}
+}
+
+// 座標と方角から行動番号を算出
+func pos_and_dir_to_action(position int, direction int) (int){
+	return position * 4 + direction
+}
+
+// 合法手の取得
+func GetLegalActions(bs [36]int) ([]int) {
+	legal_actions := make([]int, 0, 32) // 合法手の上限は32
+	// ゴール行動だけは可能であれば最初に追加
+	if bs[0] == 1 {
+		legal_actions = append(legal_actions, 2)
+	}
+	if bs[5] == 1 {
+		legal_actions = append(legal_actions, 22)
+	}
+
+	// 合法手を探す
+	for position, piece := range bs {
+		if piece == 1 || piece == 2 {
+			x := position % 6
+        	y := int(position / 6)
+			if y != 5 { // 下端でない
+				if bs[position + 6] != 1 && bs[position + 6] != 2{ // 下に自分の駒がいない
+					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 0))
+				}
+			}
+			if x != 0 { // 左端でない
+				if bs[position - 1] != 1 && bs[position - 1] != 2{ // 左に自分の駒がいない
+					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 1))
+				}
+			}
+			if y != 0 { // 上端でない
+				if bs[position - 6] != 1 && bs[position - 6] != 2{ // 上に自分の駒がいない
+					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 2))
+				}
+			}
+			if y != 0 { // 右端でない
+				if bs[position + 1] != 1 && bs[position + 1] != 2{ // 右に自分の駒がいない
+					legal_actions = append(legal_actions, pos_and_dir_to_action(position, 3))
+				}
+			}
+		}
+	}
+	return legal_actions
 }
 
 // 盤面の状態を表示
